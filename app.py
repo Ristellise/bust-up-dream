@@ -18,7 +18,7 @@ import quart
 from quart import websocket
 from . import oggparse
 
-app = quart.Blueprint("Wenn", "wenn", )
+app = quart.Blueprint("App", "app", )
 
 
 class OpusAudioSource:
