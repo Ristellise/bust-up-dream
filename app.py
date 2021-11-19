@@ -195,7 +195,7 @@ class OpusStreamer:
         self.cover = {"cover": ""}
         self._prefill = io.BytesIO()
         self.loop: typing.Optional[asyncio.AbstractEventLoop] = None
-        self.playlist = PlaylistReader(str(pathlib.Path("Music")), "Wenn_*.m3u8")
+        self.playlist = PlaylistReader(str(pathlib.Path("Music")), "Music_*.m3u8")
         self.audioLock = asyncio.Lock()
         self.meta = {}
 

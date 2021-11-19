@@ -21,9 +21,9 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 * 
-* Wenn Class for interfacing with the lower level ws audio api.
+* WennPlayer Class for interfacing with the lower level ws audio api.
 */
-class Wenn {
+class WennPlayer {
     setup(artist, track, album, cover) {
         let loc = window.location, new_uri;
         new_uri = "ws:" + "//" + loc.host + loc.pathname + "stream"

@@ -1,4 +1,4 @@
-# [Wenn](https://www.youtube.com/watch?v=rIIcFY-wKWg)
+# [BUST UP DREAM](https://www.youtube.com/watch?v=anzcYSTY270)
 
 A simple open-source web radio station.
 
@@ -30,7 +30,7 @@ For songs, place them in the specified format:
       - Song 5.opus
       - Cover.jpg
    - Cover.jpg
-   - Wenn_1.m3u8
+   - Music_1.m3u8
 
 A valid example format is in the Music directory.
 
@@ -42,7 +42,7 @@ A valid example format is in the Music directory.
 
 ## Acknowledgements
 
-- ws-audio-api [wenn-ws.js] (Modified to support multiple channels & chrome fix.)
+- ws-audio-api [ws.js] (Modified to support multiple channels & chrome fix.)
 - Listen.moe (Design was liften from it since I can't design...)
 
 ## Websocket API
@@ -56,4 +56,4 @@ Rest of the data recieved in binary are singular opus packets, (typically 20ms.)
 
 ## Disclaimer
 
-No support will be provided, I'm just providing the code & script. 
+**No support will be provided**, I'm just providing the code & script. 

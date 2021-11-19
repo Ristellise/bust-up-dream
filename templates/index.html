@@ -73,8 +73,8 @@
 </head>
 <body style="background: #171717">
 <div class="container" style="top: 50%; position: absolute; left: 50%; transform: translate(-50%, -50%);">
-    <div class="card-title text-light"><h1 style="display: inline">Wenn</h1>
-        <p style="display: inline;">A Strike Witches Radio Stream.</p></div>
+    <div class="card-title text-light"><h1 style="display: inline"></h1>
+        <p style="display: inline;"></p></div>
     <div class="container" style="text-align: center">
         <div class="row">
             <div class="col-1" style="width: 120px">
@@ -111,8 +111,8 @@
 <script src="/static/wenn-ws.js"></script>
 <script src="/static/wenn.js"></script>
 <script>
-    wennInstance = new Wenn();
-    wennInstance.setup(
+    playerInstance = new WennPlayer();
+    playerInstance.setup(
         document.querySelector('#artist'),
         document.querySelector('#track'),
         document.querySelector('#album'),
@@ -134,13 +134,13 @@
     }
 
     function switchstate() {
-        console.log(wennInstance.isStarted())
-        if (wennInstance.isStarted()) {
+        console.log(playerInstance.isStarted())
+        if (playerInstance.isStarted()) {
             setSVG(true)
-            wennInstance.stop()
+            playerInstance.stop()
         } else {
             setSVG(false)
-            wennInstance.start()
+            playerInstance.start()
         }
     }
 
