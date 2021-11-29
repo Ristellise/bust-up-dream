@@ -91,7 +91,6 @@ class OggPage:
 class OggStream:
     def __init__(self, stream: IO[bytes]) -> None:
         self.stream: IO[bytes] = stream
-        self.meta = audio_metadata.load(stream)
         stream.seek(0)
 
     def _next_page(self) -> Optional[OggPage]:

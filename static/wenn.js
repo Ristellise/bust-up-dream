@@ -26,7 +26,8 @@
 class WennPlayer {
     setup(artist, track, album, cover) {
         let loc = window.location, new_uri;
-        new_uri = "ws:" + "//" + loc.host + loc.pathname + "stream"
+        var proto = window.location.href.indexOf("https://") === 0 ? "wss:" : "ws:";
+        new_uri = proto + "//" + loc.host + loc.pathname + "api/stream"
         const _this = this
         var defaultConfig = {
             codec: {
@@ -35,19 +36,88 @@ class WennPlayer {
                 app: 2049,
                 frameDuration: 20,
                 bufferSize: 4096,
-                calcBuffer: true
+                calcBuffer: true,
+                isPacked: true
             },
             server: new_uri,
-            html: {
-                artist: artist, track: track, album: album, cover
+            events: {
+                instance: _this,
+                jsonEvent: _this.onWebsockJsonEvent
             },
             contextOpts: {
                 sampleRate: 48000
             }
         };
-        this.c = {lastVol: 0.5}
-        console.log(this.c)
+        this.c = {
+            lastVol: 0.5,
+            html: {
+                artist: artist, track: track, album: album, cover: cover
+            },
+            enableLogging: true
+        }
         this.c.player = new WSAudioAPI.Player(defaultConfig);
+    }
+
+    b64toBlob(dataURI) {
+
+        var byteString = atob(dataURI.split(',')[1]);
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], {type: 'image/jpeg'});
+    }
+
+    onWebsockJsonEvent(jsonData, _this) {
+        if (jsonData.event === 'meta') {
+            if (jsonData.artist) {
+                if (typeof (ketikin) !== 'undefined')
+                    ketikin(_this.c.html.artist, {
+                        texts: [jsonData.artist[0]], speed: 50, loop: false
+                    })
+                else
+                    _this.c.html.artist.innerText = jsonData.artist[0]
+            }
+            if (jsonData.title) {
+                if (typeof (ketikin) !== 'undefined')
+                    ketikin(_this.c.html.track, {
+                        texts: [jsonData.title[0]], speed: 50, loop: false
+                    })
+                else
+                    _this.c.html.track.innerText = jsonData.title[0]
+            }
+            if (jsonData.album) {
+                if (typeof (ketikin) !== 'undefined')
+                    ketikin(_this.c.html.album, {
+                        texts: [jsonData.album[0]], speed: 50, loop: false
+                    })
+                else
+                    _this.c.html.album.innerText = jsonData.album[0]
+            }
+            var coverShown = window.getComputedStyle(document.querySelector("#cover").parentElement).display;
+            if (coverShown !== 'none') {
+                if (jsonData.cover) {
+                    _this.c.html.cover.src = URL.createObjectURL(
+                        _this.b64toBlob("data:image/jpeg;base64," + jsonData.cover.cover)
+                    )
+                } else
+
+                    _this.setImage(_this); // cursed i know but fuck it.
+            }
+        }
+    }
+
+    rand(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    setImage(_this = null) {
+        if (_this == null)
+            this.c.html.cover.src = "/api/cover?" + this.rand(0, 1000);
+        else
+            _this.c.html.cover.src = "/api/cover?" + this.rand(0, 1000);
     }
 
     log(side, message) {

@@ -15,15 +15,20 @@
             app: 2048,
             frameDuration: 20,
             bufferSize: 4096,
-            calcBuffer: false
+            calcBuffer: false,
+            isPacked: false
         },
-        textFunc: null,
+        events: {
+            instance: null,
+            jsonEvent: null,
+            blobParser: null
+        },
         server: {
             host: window.location.hostname
         },
         contextOpts: {
             sampleRate: 24000
-        }
+        },
     };
 
     var AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -33,6 +38,7 @@
         Player: function (config, socket) {
             this.config = config || {};
             this.config.codec = this.config.codec || defaultConfig.codec;
+            this.config.events = this.config.events || defaultConfig.events;
             this.config.server = this.config.server || defaultConfig.server;
             this.config.contextOpts = this.config.contextOpts || defaultConfig.contextOpts;
             audioContext = new AudioContext(this.config.contextOpts);
@@ -49,17 +55,6 @@
         },
     };
 
-    function b64toBlob(dataURI) {
-
-        var byteString = atob(dataURI.split(',')[1]);
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
-
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-        return new Blob([ab], {type: 'image/jpeg'});
-    }
 
     WSAudioAPI.Player.prototype.start = function () {
         var _this = this;
@@ -103,6 +98,7 @@
                     }
                 }
             } else {
+                console.warn("Buffer empty!");
                 for (var i = 0; i < chans; i++) {
                     e.outputBuffer.getChannelData(i).set(_this.silence);
                 }
@@ -124,23 +120,32 @@
             }
             audioContext.resume()
             if (message.data instanceof Blob) {
-
-                var reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = function () {
-                    var dd = _this.decoder.decode_float(reader.result);
-                    _this.audioQueue.write(dd);
+                    if (_this.config.codec.isPacked) {
+                        const dv = new DataView(reader.result);
+                        var curr =0;
+                        var pksize = dv.getUint16(0);
+                        curr += 2;
+                        while (pksize > 0) {
+                            var wavAudio = _this.decoder.decode_float(dv.buffer.slice(curr,curr+pksize));
+                            _this.audioQueue.write(wavAudio);
+                            curr += pksize;
+                            if (curr >= dv.byteLength)
+                                break;
+                            pksize = dv.getUint16(curr);
+                            curr += 2;
+                        }
+                    } else {
+                        var dd = _this.decoder.decode_float(reader.result);
+                        _this.audioQueue.write(dd);
+                    }
                 };
                 reader.readAsArrayBuffer(message.data);
             } else if (typeof message.data === "string") {
-
-                const trackData = JSON.parse(message.data);
-                if (trackData.cover) {
-                    _this.config.html.cover.src = URL.createObjectURL(b64toBlob("data:image/jpeg;base64," + trackData.cover))
-                    return;
-                }
-                _this.config.html.artist.innerText = trackData.artist[0]
-                _this.config.html.track.innerText = trackData.title[0]
-                _this.config.html.album.innerText = trackData.album[0]
+                const jsonData = JSON.parse(message.data);
+                if (_this.config.events.jsonEvent)
+                    _this.config.events.jsonEvent(jsonData, _this.config.events.instance);
             }
         };
     };
