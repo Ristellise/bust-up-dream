@@ -35,6 +35,21 @@ class m3u8Reader(PlaylistReader):
                     t_songs.append(i)
             self.songs = t_songs
 
+    def get_list(self):
+        self.read_pl()
+        self.queued = self.songs.copy()
+        random.shuffle(self.queued)
+        return self.queued
+
+    def get_cover(self, song_path):
+        print("cover", song_path)
+        cover = list(pathlib.Path(song_path).resolve().parent.glob("cover.*"))
+        if len(cover) == 0:
+            cover = list(pathlib.Path(song_path).resolve().parent.glob("Cover.*"))
+            if len(cover) == 0:
+                return self.fallback_cover()
+        return cover[0]
+
     def get_song(self):
         self.read_pl()
         err = 0
@@ -49,11 +64,7 @@ class m3u8Reader(PlaylistReader):
                 err += 1
             else:
                 break
-        cover = list(pathlib.Path(song).resolve().parent.glob("cover.*"))
-        if len(cover) == 0:
-            cover = list(pathlib.Path(song).resolve().parent.glob("Cover.*"))
-            if len(cover) == 0:
-                return song, self.fallback_cover()
+        cover = self.get_cover(pathlib.Path(song))
         return song, cover
 
     def fallback_cover(self):

@@ -39,13 +39,13 @@ class OpusStreamer:
         print("Starting runner.")
         self.loop = loop
         while True:
-            song_fp, cover = self.playlist.get_song()
+            song_fp, cover = self.playlist.get_song(rack_idx=-1)
             self.src = detect_source(song_fp)
             self.meta = dict(self.src.meta.tags)
             await self.audioLock.acquire()
-            with Image.open(cover[0]) as im:
+            with Image.open(cover) as im:
                 im: PIL.Image.Image = im
-                im.thumbnail(size=(512, 512),resample=Image.LANCZOS)
+                im.thumbnail(size=(512, 512), resample=Image.LANCZOS)
                 byteData = io.BytesIO()
                 im.save(byteData, format="jpeg", quality=95)
             byteData.seek(0)
